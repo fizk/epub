@@ -8,8 +8,6 @@ use RecursiveIterator;
 
 interface FormatterInterface {
 
-    public function format(string $content): string;
-
     public function formatChapterTitle(string $title): string;
 
     public function formatPageTitle(string $title): string;

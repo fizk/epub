@@ -25,7 +25,7 @@ class RecursiveDirectory implements RecursiveIterator {
                     return $this->getFilename();
                 }
             };
-        }, array_diff(scandir($this->currentFileObject->getRealPath()), array('..', '.'))));
+        }, array_diff(scandir($this->currentFileObject->getRealPath()), array('..', '.', '.DS_Store'))));
     }
 
     /* Methods */

@@ -20,6 +20,7 @@ class Epub3 implements ContainerInterface {
     private FormatterInterface $formatter;
     private StorageInterface $storage;
     private ?string $coverPage = null;
+    private ?array $coverImage = null;
 
     public function __construct(string $title) {
         $this->setPackage(new Package($this->generateUUID(), $title, new DateTime()));
@@ -52,18 +53,21 @@ class Epub3 implements ContainerInterface {
 
     public function setCoverPage(string $content): self {
         $this->coverPage = $content;
-
         return $this;
     }
 
-    public function setCoverImage($resource): self {
-
+    public function setCoverImage($resource, $mediaType, $extension): self {
+        $this->coverImage = [
+            'resource' => $resource,
+            'mediaType' => $mediaType,
+            'extension' => $extension,
+        ];
         return $this;
     }
 
-    public function addResource($content, string $mimetype, string $extension): string {
+    public function addResource($content, string $mediaType, string $extension): string {
         $id = 'resource'.\md5($content);
-        $this->package->addManifest("resources/{$id}.{$extension}", $id, $mimetype);
+        $this->package->addManifest("resources/{$id}.{$extension}", $id, $mediaType);
         $this->storage->createResource("EPUB/resources/{$id}.{$extension}", $content);
 
         return "../resources/{$id}.{$extension}";
@@ -74,11 +78,8 @@ class Epub3 implements ContainerInterface {
 
         $this->storage->createContainer('META-INF');
         $this->storage->createContainer('EPUB');
-        $this->storage->createContainer('EPUB/images');
+        $this->storage->createContainer('EPUB/resources');
         $this->storage->createContainer('EPUB/content');
-
-        //     ->addManifest('content/styles.css', 'css', 'text/css')
-        //     ->addManifest('images/cover.jpg', 'cover-image', 'image/jpeg')
 
         $this->storage->createResource('META-INF/container.xml', '<?xml version="1.0"?>'. "\n" .
             '<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">'. "\n" .
@@ -93,6 +94,14 @@ class Epub3 implements ContainerInterface {
                 ->addManifest('content/cover-page.xhtml', 'cover-page', 'application/xhtml+xml')
                 ->addSpine('cover-page')
             ;
+        }
+
+        if ($this->coverImage) {
+            $id = 'cover'.\md5($this->coverImage['resource']);
+            $this->storage
+                ->createResource("EPUB/resources/{$id}.{$this->coverImage['extension']}", $this->coverImage['resource']);
+            $this->package
+                ->addManifest("resources/{$id}.{$this->coverImage['extension']}", $id, $this->coverImage['mediaType'], ['cover-image']);
         }
 
         $this->package
