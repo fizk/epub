@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  test:
+    build: .
+    volumes:
+        - ./src:/var/www/src
+        - ./phpunit.xml:/var/www/phpunit.xml
+        - ./tests:/var/www/tests
+    command: ./vendor/bin/phpunit

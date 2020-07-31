@@ -1,0 +1,18 @@
+{
+    "name": "fizk/epub",
+    "version": "1.0.0",
+    "require": {
+        "php": "7.4.*",
+        "ext-imagick": "*",
+        "ext-zip": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9",
+        "mikey179/vfsstream": "^1.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Epub\\": "src/"
+        }
+    }
+}
