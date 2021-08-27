@@ -14,7 +14,7 @@ class ResourceMemory implements ResourceInterface {
         $this->content = $content;
         $this->children = $children;
     }
-    public function getContent() {
+    public function getContent(): ?string {
         return $this->content;
     }
 
@@ -22,7 +22,7 @@ class ResourceMemory implements ResourceInterface {
         return $this->name;
     }
 
-    public function getChildren() {
+    public function getChildren(): ?array {
         return $this->children;
     }
 }

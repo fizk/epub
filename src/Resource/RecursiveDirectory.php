@@ -2,9 +2,9 @@
 
 namespace Epub\Resource;
 
+use Epub\Resource\ResourceInterface;
 use RecursiveIterator;
 use SplFileInfo;
-use Epub\Resource\ResourceInterface;
 
 class RecursiveDirectory implements RecursiveIterator {
 
@@ -14,7 +14,6 @@ class RecursiveDirectory implements RecursiveIterator {
 
     public function __construct ($directory) {
         $this->currentFileObject = new SplFileInfo($directory);
-        var_dump($this->currentFileObject->getRealPath());
         $this->children = array_values(array_map(function ($item) use ($directory) {
             return new class ($directory . '/' .$item) extends SplFileInfo implements  ResourceInterface {
                 public function getContent() {
@@ -28,7 +27,6 @@ class RecursiveDirectory implements RecursiveIterator {
         }, array_diff(scandir($this->currentFileObject->getRealPath()), array('..', '.', '.DS_Store'))));
     }
 
-    /* Methods */
     public function getChildren(): RecursiveIterator {
         return new RecursiveDirectory($this->children[$this->index]->getRealPath());
     }
@@ -37,7 +35,6 @@ class RecursiveDirectory implements RecursiveIterator {
         return $this->children[$this->index]->isDir();
     }
 
-    /* Inherited methods */
     public function current() {
         return $this->children[$this->index];
     }

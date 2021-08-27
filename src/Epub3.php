@@ -10,6 +10,9 @@ use Epub\Formatter\FormatterInterface;
 use Epub\Storage\StorageInterface;
 use Epub\Storage\StorageMemory;
 use Epub\Formatter\BlankFormatter;
+use Psr\Log\LoggerInterface;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 use RecursiveIterator;
 use DateTime;
 
@@ -19,6 +22,7 @@ class Epub3 implements ContainerInterface {
     private Package $package;
     private FormatterInterface $formatter;
     private StorageInterface $storage;
+    private LoggerInterface $logger;
     private ?string $coverPage = null;
     private ?array $coverImage = null;
 
@@ -27,6 +31,13 @@ class Epub3 implements ContainerInterface {
         $this->setNavigation(new XHTMLNavigation());
         $this->setStorage(new StorageMemory());
         $this->setFormatter(new BlankFormatter());
+
+        $this->logger = new Logger('epub3');
+        $this->logger->pushHandler(new StreamHandler('php://stdout', Logger::DEBUG));
+    }
+
+    public function setLogger(LoggerInterface $logger) {
+        $this->logger = $logger;
     }
 
     public function setNavigation(NavigationInterface $navigation): self {
@@ -74,6 +85,7 @@ class Epub3 implements ContainerInterface {
     }
 
     public function save(RecursiveIterator $iterator): void {
+        $this->logger->info("Starting process with formatter : " . get_class($this->formatter));
         $this->storage->createResource('mimetype', 'application/epub+zip');
 
         $this->storage->createContainer('META-INF');
@@ -112,13 +124,16 @@ class Epub3 implements ContainerInterface {
 
         $this->storage->createResource('EPUB/toc.xhtml', (string) $this->navigation);
         $this->storage->createResource('EPUB/package.opf', (string) $this->package);
+
+        $this->logger->info("Process done");
     }
 
     private function addPage(string $title, ?string $content = null, ?NavigationInterface $navItem = null): NavigationInterface {
         $contentLocation = null;
 
         if ($content) {
-            $id = 'item'.md5($title.$content);
+            // $id = 'item'.md5($title.$content);
+            $id = $title;
             $contentLocation = "content/{$id}.xhtml";
             $this->storage->createResource("EPUB/{$contentLocation}", $content);
             $this->package->addManifest($contentLocation, $id);
@@ -136,35 +151,30 @@ class Epub3 implements ContainerInterface {
         foreach ($iterator as $value) {
             if ($iterator->hasChildren()) {
                 try {
+                    $chapterTemplate = $this->formatter->chapterTemplate(clone $value, clone $iterator->getChildren());
                     $subNavItem = $workspace->addPage(
                         $this->formatter->formatChapterTitle($value->getName()),
-                        $this->formatter->chapterTemplate(clone $value, clone $iterator->getChildren()),
+                        $chapterTemplate ? $chapterTemplate->saveXML() : null,
                         $navItem
                     );
                     $this->iterate($iterator->getChildren(), $workspace, $subNavItem);
                     continue;
                 } catch (\Throwable $e) {
-                    print_r([
-                        $e->getMessage(),
-                        $value->getName(),
-                        $e->getTraceAsString(),
-                    ]);
+                    $this->logger->error($e->getMessage() .' '. $value->getName(), $e->getTrace());
                     exit(1);
                 }
-
+                $this->logger->debug("Processed {$value->getName()}");
             }
             try {
+                $pageTemplate = $this->formatter->pageTemplate(clone $value, $value->getContent());
                 $workspace->addPage(
-                    $this->formatter->formatPageTitle($value->getName()),
-                    $this->formatter->pageTemplate(clone $value, $value->getContent()),
+                    $this->formatter->formatPageTitle($value->getName(), $value->getContent()),
+                    $pageTemplate ? $pageTemplate->saveXML() : null,
                     $navItem
                 );
+                $this->logger->debug("Processed {$value->getName()}");
             } catch (\Throwable $e) {
-                print_r([
-                    $e->getMessage(),
-                    $value->getName(),
-                    $e->getTraceAsString(),
-                ]);
+                $this->logger->error($e->getMessage() . ' ' . $value->getName(), $e->getTrace());
             }
 
         }
