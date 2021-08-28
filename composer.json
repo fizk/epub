@@ -12,7 +12,7 @@
     "license": "MIT",
     "require": {
         "php": "^7.2||^8.0",
-        "ext-imagick": "*",
+        "ext-zip": "*",
         "monolog/monolog": "^2.3"
     },
     "require-dev": {
