@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  folklore:
+    build: .
+    volumes:
+      - ./<some-workspace>:/app/src
+    command: php /app/src/index.php
