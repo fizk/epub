@@ -141,7 +141,8 @@ class Epub3 implements ContainerInterface {
 
     public function encodeContentUri(string $name): string
     {
-        return"content/". rawurlencode($name).".xhtml";
+        $fileName = preg_replace('/[^a-z0-9]+/', '-', strtolower($name));
+        return"content/". rawurlencode($fileName).".xhtml";
     }
 
     private function addPage(string $title, ?string $content = null, ?NavigationInterface $navItem = null): NavigationInterface
