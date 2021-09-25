@@ -2,7 +2,7 @@
 
 namespace Epub\Document\Navigation;
 
-interface NavigationInterface {
-
+interface NavigationInterface
+{
     public function addNavigation(string $title, string $location = null): NavigationInterface;
 }

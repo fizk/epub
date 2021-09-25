@@ -2,8 +2,8 @@
 
 namespace Epub\Resource;
 
-interface ResourceInterface {
-
+interface ResourceInterface
+{
     public function getContent() /*:mixed */;
 
     public function getName(): string;

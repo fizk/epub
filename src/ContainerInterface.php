@@ -4,8 +4,11 @@ namespace Epub;
 
 use RecursiveIterator;
 
-interface ContainerInterface {
+interface ContainerInterface
+{
     public function save(RecursiveIterator $iterator): void;
 
     public function addResource($content, string $mimetype, string $extension): string;
+
+    public function encodeContentUri(string $name): string;
 }

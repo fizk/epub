@@ -11,7 +11,8 @@ use DOMImplementation;
 //@todo <nav epub:type="landmarks">
 //@todo stylesheets
 
-class XHTMLNavigation implements NavigationInterface {
+class XHTMLNavigation implements NavigationInterface
+{
     private DOMDocument $dom;
     private DOMElement $rootElement;
     private DOMElement $headerElement;
@@ -19,7 +20,8 @@ class XHTMLNavigation implements NavigationInterface {
     private DOMElement $navElement;
     private DOMElement $navList;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->doc = new DOMDocument('1.0', 'UTF-8');
 
         $implementation = new DOMImplementation();
@@ -41,12 +43,14 @@ class XHTMLNavigation implements NavigationInterface {
         $this->doc->appendChild($this->root);
     }
 
-    public function addNavigation(string $title, string $location = null): NavigationItem {
+    public function addNavigation(string $title, string $location = null): NavigationItem
+    {
         return (new NavigationItem($this->navElement, $this->navList))
             ->addNavigation($title, $location);
     }
 
-    private function createHeader(): DOMElement {
+    private function createHeader(): DOMElement
+    {
         $headerElement = $this->doc->createElement('head');
         $metaCharsetElement = $this->doc->createElement('meta');
         $metaCharsetElement->setAttribute('charset', 'utf-8');
@@ -56,24 +60,30 @@ class XHTMLNavigation implements NavigationInterface {
         return $headerElement;
     }
 
-    private function createBody() : DOMElement{
+    private function createBody() : DOMElement
+    {
         $bodyElement = $this->doc->createElement('body');
         return $bodyElement;
     }
 
-    private function createNavContainer(string $type = 'toc'): DOMElement {
+    private function createNavContainer(string $type = 'toc'): DOMElement
+    {
         $navElement = $this->doc->createElement('nav');
         $navElement->setAttribute('epub:type', $type);
         return $navElement;
     }
 
-    private function createNavListContainer(): DOMElement {
+    private function createNavListContainer(): DOMElement
+    {
         $navList = $this->doc->createElement('ol');
 
         return $navList;
     }
 
-    public function __toString(): string {
+    public function __toString(): string
+    {
+        $this->doc->preserveWhiteSpace = false;
+        $this->doc->formatOutput = true;
         return $this->doc->saveXML();
     }
 }

@@ -7,8 +7,8 @@ use Epub\ContainerInterface;
 use Epub\Resource\ResourceInterface;
 use RecursiveIterator;
 
-interface FormatterInterface {
-
+interface FormatterInterface
+{
     public function formatChapterTitle(string $title): string;
 
     public function formatPageTitle(string $title, ?string $content): string;

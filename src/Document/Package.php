@@ -6,28 +6,31 @@ use DOMDocument;
 use DOMElement;
 use DateTime;
 
-class Package {
-    private DOMDocument $dom;
-    private DOMElement $rootElement;
+class Package
+{
     private DOMElement $metadataElement;
     private DOMElement $manifestElement;
     private DOMElement $spineElement;
-    private DOMElement $collectionElement;
 
-    public function __construct(string $id, string $title, DateTime $date, ?string $lang = 'en') {
+    public function __construct(string $id, string $title, DateTime $date, ?string $lang = 'en')
+    {
         $this->doc = new DOMDocument();
         $this->root = $this->createPackageElement($lang);
-        $this->metadataElement = $this->createMetadataElement($id, $title, $date, $lang);
-        $this->manifestElement = $this->createManifestElement();
-        $this->spineElement = $this->createSpineElement();
-
         $this->doc->appendChild($this->root);
+
+        $this->metadataElement = $this->createMetadataElement($id, $title, $date, $lang);
         $this->root->appendChild($this->metadataElement);
+
+        $this->manifestElement = $this->createManifestElement();
         $this->root->appendChild($this->manifestElement);
+
+        $this->spineElement = $this->createSpineElement();
+        $this->spineElement->setAttribute('page-progression-direction', 'ltr');
         $this->root->appendChild($this->spineElement);
     }
 
-    public function addManifest(string $href, string $id, string $mediaType = 'application/xhtml+xml', array $properties = []): self {
+    public function addManifest(string $href, string $id, string $mediaType = 'application/xhtml+xml', array $properties = []): self
+    {
         $itemElement = $this->doc->createElement('item');
         $itemElement->setAttribute('href', $href);
         $itemElement->setAttribute('id', $id);
@@ -39,19 +42,27 @@ class Package {
         return $this;
     }
 
-    public function addSpine(string $idref, string $linear = 'yes'): self {
+    public function addSpine(string $idref, string $linear ='yes', array $properties = []): self
+    {
         $itemElement = $this->doc->createElement('itemref');
         $itemElement->setAttribute('idref', $idref);
         $itemElement->setAttribute('linear', $linear);
+        if (\count($properties) > 0) $itemElement->setAttribute('properties', \implode(' ', $properties));
 
         $this->spineElement->appendChild($itemElement);
 
         return $this;
     }
 
+    public function addMetadata(MetadataInterface $metadata)
+    {
+        $metadata->append($this->metadataElement);
+    }
+
     // @todo add optional meta tags https://www.w3.org/publishing/epub3/epub-packages.html#sec-opf-dcmes-optional
 
-    private function createPackageElement(string $xmllang = null, string $dir = 'ltr' , string $id = null, string $prefix = null): DOMElement {
+    private function createPackageElement(string $xmllang = null, string $dir = 'ltr' , string $id = null, string $prefix = null): DOMElement
+    {
         $packageElement = $this->doc->createElement('package');
         $packageElement->setAttribute('xmlns', 'http://www.idpf.org/2007/opf');
         $packageElement->setAttribute('xmlns:dc', 'http://purl.org/dc/elements/1.1/');
@@ -65,7 +76,8 @@ class Package {
         return $packageElement;
     }
 
-    private function createMetadataElement(string $id, string $title, DateTime $date, string $language = null): DOMElement {
+    private function createMetadataElement(string $id, string $title, DateTime $date, string $language = null): DOMElement
+    {
         $metadataElement = $this->doc->createElement('metadata');
 
         $dcIdentifierElement = $this->doc->createElement('dc:identifier');
@@ -101,19 +113,29 @@ class Package {
         return $metadataElement;
     }
 
-    private function createSpineElement(): DOMElement {
+    private function createSpineElement(): DOMElement
+    {
         $spineElement = $this->doc->createElement('spine');
 
         return $spineElement;
     }
 
-    private function createManifestElement(): DOMElement {
+    private function createManifestElement(): DOMElement
+    {
         $manifestElement = $this->doc->createElement('manifest');
 
         return $manifestElement;
     }
 
-    public function __toString(): string {
+    public function toDom(): DOMDocument
+    {
+        return $this->doc;
+    }
+
+    public function __toString(): string
+    {
+        $this->doc->preserveWhiteSpace = false;
+        $this->doc->formatOutput = true;
         return $this->doc->saveXML();
     }
 }

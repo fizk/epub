@@ -26,7 +26,8 @@ class Epub3 implements ContainerInterface {
     private ?string $coverPage = null;
     private ?array $coverImage = null;
 
-    public function __construct(string $title) {
+    public function __construct(string $title)
+    {
         $this->setPackage(new Package($this->generateUUID(), $title, new DateTime()));
         $this->setNavigation(new XHTMLNavigation());
         $this->setStorage(new StorageMemory());
@@ -36,38 +37,46 @@ class Epub3 implements ContainerInterface {
         $this->logger->pushHandler(new StreamHandler('php://stdout', Logger::DEBUG));
     }
 
-    public function setLogger(LoggerInterface $logger) {
+    public function setLogger(LoggerInterface $logger): self
+    {
         $this->logger = $logger;
+        return $this;
     }
 
-    public function setNavigation(NavigationInterface $navigation): self {
+    public function setNavigation(NavigationInterface $navigation): self
+    {
         $this->navigation = $navigation;
         return $this;
     }
 
-    public function setPackage(Package $package): self {
+    public function setPackage(Package $package): self
+    {
         $this->package = $package;
         return $this;
     }
 
-    public function setFormatter(FormatterInterface $formatter): self {
+    public function setFormatter(FormatterInterface $formatter): self
+    {
         $this->formatter = $formatter;
         $formatter->setWorkspace($this);
 
         return $this;
     }
 
-    public function setStorage(StorageInterface $storage): self {
+    public function setStorage(StorageInterface $storage): self
+    {
         $this->storage = $storage;
         return $this;
     }
 
-    public function setCoverPage(string $content): self {
+    public function setCoverPage(string $content): self
+    {
         $this->coverPage = $content;
         return $this;
     }
 
-    public function setCoverImage($resource, $mediaType, $extension): self {
+    public function setCoverImage($resource, $mediaType, $extension): self
+    {
         $this->coverImage = [
             'resource' => $resource,
             'mediaType' => $mediaType,
@@ -76,7 +85,8 @@ class Epub3 implements ContainerInterface {
         return $this;
     }
 
-    public function addResource($content, string $mediaType, string $extension): string {
+    public function addResource($content, string $mediaType, string $extension): string
+    {
         $id = 'resource'.\md5($content);
         $this->package->addManifest("resources/{$id}.{$extension}", $id, $mediaType);
         $this->storage->createResource("EPUB/resources/{$id}.{$extension}", $content);
@@ -84,7 +94,8 @@ class Epub3 implements ContainerInterface {
         return "../resources/{$id}.{$extension}";
     }
 
-    public function save(RecursiveIterator $iterator): void {
+    public function save(RecursiveIterator $iterator): void
+    {
         $this->logger->info("Starting process with formatter : " . get_class($this->formatter));
         $this->storage->createResource('mimetype', 'application/epub+zip');
 
@@ -113,7 +124,7 @@ class Epub3 implements ContainerInterface {
             $this->storage
                 ->createResource("EPUB/resources/{$id}.{$this->coverImage['extension']}", $this->coverImage['resource']);
             $this->package
-                ->addManifest("resources/{$id}.{$this->coverImage['extension']}", $id, $this->coverImage['mediaType'], ['cover-image']);
+                ->addManifest("resources/{$id}.{$this->coverImage['extension']}", 'cover', $this->coverImage['mediaType'], ['cover-image']);
         }
 
         $this->package
@@ -128,16 +139,19 @@ class Epub3 implements ContainerInterface {
         $this->logger->info("Process done");
     }
 
-    private function addPage(string $title, ?string $content = null, ?NavigationInterface $navItem = null): NavigationInterface {
-        $contentLocation = null;
+    public function encodeContentUri(string $name): string
+    {
+        return"content/". rawurlencode($name).".xhtml";
+    }
+
+    private function addPage(string $title, ?string $content = null, ?NavigationInterface $navItem = null): NavigationInterface
+    {
+        $contentLocation = $this->encodeContentUri($title);
 
         if ($content) {
-            // $id = 'item'.md5($title.$content);
-            $id = $title;
-            $contentLocation = "content/{$id}.xhtml";
             $this->storage->createResource("EPUB/{$contentLocation}", $content);
-            $this->package->addManifest($contentLocation, $id);
-            $this->package->addSpine($id);
+            $this->package->addManifest($contentLocation, \md5($contentLocation));
+            $this->package->addSpine(\md5($contentLocation));
         }
 
         $returnNavItem = ($navItem)
@@ -147,7 +161,8 @@ class Epub3 implements ContainerInterface {
         return $returnNavItem;
     }
 
-    private function iterate(RecursiveIterator $iterator, Epub3 $workspace, NavigationInterface $navItem = null) {
+    private function iterate(RecursiveIterator $iterator, Epub3 $workspace, NavigationInterface $navItem = null)
+    {
         foreach ($iterator as $value) {
             if ($iterator->hasChildren()) {
                 try {
@@ -180,7 +195,8 @@ class Epub3 implements ContainerInterface {
         }
     }
 
-    private function generateUUID(): string {
+    private function generateUUID(): string
+    {
         return sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
             // 32 bits for "time_low"
             mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ),

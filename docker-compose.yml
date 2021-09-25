@@ -2,9 +2,12 @@ version: '3'
 
 services:
   test:
+    ports:
+      - 9000:9000
     build: .
     volumes:
         - ./src:/var/www/src
         - ./phpunit.xml:/var/www/phpunit.xml
+        - ./vendor:/vendor
         - ./tests:/var/www/tests
-    command: ./vendor/bin/phpunit
+    # command: ./vendor/bin/phpunit
