@@ -2,6 +2,7 @@
 
 namespace Epub;
 
+use Epub\Resource\ResourceInterface;
 use RecursiveIterator;
 
 interface ContainerInterface
@@ -10,5 +11,5 @@ interface ContainerInterface
 
     public function addResource($content, string $mimetype, string $extension): string;
 
-    public function encodeContentUri(string $name): string;
+    public function encodeContentUri(ResourceInterface $resource): string;
 }

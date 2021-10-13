@@ -9,28 +9,28 @@ use DOMDocument;
 
 class BlankFormatter implements FormatterInterface
 {
-    public function formatChapterTitle(string $title): string
+    public function formatChapterTitle(ResourceInterface $resource): string
     {
-        return $title;
+        return $resource->getName();
     }
 
-    public function formatPageTitle(string $title, ?string $content): string
+    public function formatPageTitle(ResourceInterface $resource): string
     {
-        return $title;
+        return $resource->getName();
     }
 
     public function setWorkspace(ContainerInterface $workspace)  {}
 
-    public function chapterTemplate(ResourceInterface $chapter, RecursiveIterator $children): ?DOMDocument
+    public function chapterTemplate(ResourceInterface $resource, RecursiveIterator $children): ?DOMDocument
     {
         return null;
     }
 
-    public function pageTemplate(ResourceInterface $page, string $content): ?DOMDocument
+    public function pageTemplate(ResourceInterface $resource): ?DOMDocument
     {
         $dom = new DOMDocument();
         $dom->appendChild(
-            $dom->createElement('html', "{$page->getName()}\n{$content}")
+            $dom->createElement('html', "{$resource->getName()}\n{$resource->getContent()}")
         );
         return $dom;
     }

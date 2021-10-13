@@ -15,6 +15,7 @@ use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use RecursiveIterator;
 use DateTime;
+use Epub\Resource\ResourceInterface;
 
 class Epub3 implements ContainerInterface {
 
@@ -139,15 +140,15 @@ class Epub3 implements ContainerInterface {
         $this->logger->info("Process done");
     }
 
-    public function encodeContentUri(string $name): string
+    public function encodeContentUri(ResourceInterface $resource): string
     {
-        $fileName = preg_replace('/[^a-z0-9]+/', '-', strtolower($name));
-        return"content/". rawurlencode($fileName).".xhtml";
+        $fileName = preg_replace('/[^a-z0-9]+/', '-', strtolower($resource->getPath()));
+        return rawurlencode($fileName).".xhtml";
     }
 
-    private function addPage(string $title, ?string $content = null, ?NavigationInterface $navItem = null): NavigationInterface
+    private function addPage(ResourceInterface $resource, string $title, ?string $content = null, ?NavigationInterface $navItem = null): NavigationInterface
     {
-        $contentLocation = $this->encodeContentUri($title);
+        $contentLocation = "content/" . $this->encodeContentUri($resource);
 
         if ($content) {
             $this->storage->createResource("EPUB/{$contentLocation}", $content);
@@ -169,7 +170,8 @@ class Epub3 implements ContainerInterface {
                 try {
                     $chapterTemplate = $this->formatter->chapterTemplate(clone $value, clone $iterator->getChildren());
                     $subNavItem = $workspace->addPage(
-                        $this->formatter->formatChapterTitle($value->getName()),
+                        $value,
+                        $this->formatter->formatChapterTitle(clone $value),
                         $chapterTemplate ? $chapterTemplate->saveXML() : null,
                         $navItem
                     );
@@ -182,9 +184,11 @@ class Epub3 implements ContainerInterface {
                 $this->logger->debug("Processed {$value->getName()}");
             }
             try {
-                $pageTemplate = $this->formatter->pageTemplate(clone $value, $value->getContent());
+                $pageTemplate = $this->formatter->pageTemplate(clone $value);
+                $i = $value->getPath();
                 $workspace->addPage(
-                    $this->formatter->formatPageTitle($value->getName(), $value->getContent()),
+                    $value,
+                    $this->formatter->formatPageTitle(clone $value),
                     $pageTemplate ? $pageTemplate->saveXML() : null,
                     $navItem
                 );

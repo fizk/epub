@@ -26,6 +26,11 @@ class ResourceMemory implements ResourceInterface
         return $this->name;
     }
 
+    public function getPath(): string
+    {
+        return $this->name;
+    }
+
     public function getChildren(): ?array
     {
         return $this->children;

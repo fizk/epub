@@ -7,6 +7,7 @@ use Epub\Resource\RecursiveMemory;
 use Epub\Resource\ResourceMemory;
 use Epub\Document\Package;
 use Epub\Document\Navigation\XHTMLNavigation;
+use Epub\Resource\ResourceInterface;
 use Psr\Log\LoggerInterface;
 
 class Epub3Test extends TestCase {
@@ -77,7 +78,7 @@ class Epub3Test extends TestCase {
     /**
      * @dataProvider encodedContentProvider
      */
-    public function testEncodeContentUri(string $uri, string $expected)
+    public function testEncodeContentUri(ResourceInterface $uri, string $expected)
     {
         $encodedContentUri = (new Epub3('title'))->encodeContentUri($uri);
 
@@ -86,12 +87,83 @@ class Epub3Test extends TestCase {
 
     public function encodedContentProvider(): array
     {
+        ;
         return [
-            ['onetwo', 'content/onetwo.xhtml'],
-            ['one two', 'content/one%20two.xhtml'],
-            ['one-two', 'content/one-two.xhtml'],
-            ['one?two', 'content/one%3Ftwo.xhtml'],
-            ['one/two', 'content/one%2Ftwo.xhtml'],
+            [new class implements ResourceInterface
+            {
+                public function getContent()
+                {
+                    return null;
+                }
+                public function getName(): string
+                {
+                    return 'file.xml';
+                }
+                public function getPath(): string
+                {
+                    return 'onetwo';
+                }
+            }, 'onetwo.xhtml'],
+            [new class implements ResourceInterface
+            {
+                public function getContent()
+                {
+                    return null;
+                }
+                public function getName(): string
+                {
+                    return 'file.xml';
+                }
+                public function getPath(): string
+                {
+                    return 'one two';
+                }
+            }, 'one-two.xhtml'],
+            [new class implements ResourceInterface
+            {
+                public function getContent()
+                {
+                    return null;
+                }
+                public function getName(): string
+                {
+                    return 'file.xml';
+                }
+                public function getPath(): string
+                {
+                    return 'one-two';
+                }
+            }, 'one-two.xhtml'],
+            [new class implements ResourceInterface
+            {
+                public function getContent()
+                {
+                    return null;
+                }
+                public function getName(): string
+                {
+                    return 'file.xml';
+                }
+                public function getPath(): string
+                {
+                    return 'one?two';
+                }
+            }, 'one-two.xhtml'],
+            [new class implements ResourceInterface
+            {
+                public function getContent()
+                {
+                    return null;
+                }
+                public function getName(): string
+                {
+                    return 'file.xml';
+                }
+                public function getPath(): string
+                {
+                    return 'one/two';
+                }
+            }, 'one-two.xhtml'],
         ];
     }
 }

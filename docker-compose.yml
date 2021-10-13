@@ -10,4 +10,4 @@ services:
         - ./phpunit.xml:/var/www/phpunit.xml
         - ./vendor:/vendor
         - ./tests:/var/www/tests
-    # command: ./vendor/bin/phpunit
+    command: ./vendor/bin/phpunit

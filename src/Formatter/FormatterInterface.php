@@ -9,13 +9,13 @@ use RecursiveIterator;
 
 interface FormatterInterface
 {
-    public function formatChapterTitle(string $title): string;
-
-    public function formatPageTitle(string $title, ?string $content): string;
-
     public function setWorkspace(ContainerInterface $workspace);
 
-    public function chapterTemplate(ResourceInterface $chapter, RecursiveIterator $children): ?DOMDocument;
+    public function formatChapterTitle(ResourceInterface $resource): string;
 
-    public function pageTemplate(ResourceInterface $page, string $content): ?DOMDocument;
+    public function formatPageTitle(ResourceInterface $resource): string;
+
+    public function chapterTemplate(ResourceInterface $resource, RecursiveIterator $children): ?DOMDocument;
+
+    public function pageTemplate(ResourceInterface $resource): ?DOMDocument;
 }
