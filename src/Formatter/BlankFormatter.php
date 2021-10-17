@@ -29,9 +29,14 @@ class BlankFormatter implements FormatterInterface
     public function pageTemplate(ResourceInterface $resource): ?DOMDocument
     {
         $dom = new DOMDocument();
-        $dom->appendChild(
-            $dom->createElement('html', "{$resource->getName()}\n{$resource->getContent()}")
-        );
+        $htmlElement = $dom->createElement('html');
+        $htmlElement->setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+        $bodyElement = $dom->createElement('body');
+        $paragraphElement = $dom->createElement('p', "{$resource->getName()}\n{$resource->getContent()}");
+
+        $bodyElement->appendChild($paragraphElement);
+        $htmlElement->appendChild($bodyElement);
+        $dom->appendChild($htmlElement);
         return $dom;
     }
 }

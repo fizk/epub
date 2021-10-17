@@ -152,8 +152,8 @@ class Epub3 implements ContainerInterface {
 
         if ($content) {
             $this->storage->createResource("EPUB/{$contentLocation}", $content);
-            $this->package->addManifest($contentLocation, \md5($contentLocation));
-            $this->package->addSpine(\md5($contentLocation));
+            $this->package->addManifest($contentLocation, 'content'.\md5($contentLocation));
+            $this->package->addSpine('content'.\md5($contentLocation));
         }
 
         $returnNavItem = ($navItem)

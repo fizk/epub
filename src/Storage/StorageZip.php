@@ -11,7 +11,6 @@ class StorageZip implements StorageInterface
     public function __construct(string $name)
     {
         file_put_contents($name, \base64_decode($this->initial()));
-        $written = file_put_contents('php://memory', \base64_decode($this->initial()));
 
         $this->zip = new ZipArchive();
         $this->zip->open($name, ZipArchive::CREATE);
